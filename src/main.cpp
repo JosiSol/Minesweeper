@@ -5,8 +5,6 @@
 #include <utility>
 #include <random>
 
-// #include <iostream>
-
 // ROWS AND COLS OF THE GRID
 #define ROWS 10
 #define COLS 10
@@ -18,7 +16,16 @@ const int CELLWIDTH = SCREENWIDTH / COLS;
 const int CELLHEIGHT = SCREENHEIGHT / ROWS;
 
 Texture2D flagSprite;
+int minesLeft;
+typedef enum GameState{
+    PLAYING,
+    GAMEOVER,
+    WIN
+} GameState;
+GameState gameState = PLAYING;
 
+float startTime;
+float elapsedTime;
 typedef struct Cell{
     int i;
     int j;
@@ -30,11 +37,14 @@ typedef struct Cell{
 
 Cell grid[ROWS][COLS];
 
+void Grid();
 void CellDraw(Cell cell);
 void CellReveal(int i, int j);
 bool InBound(int i, int j);
 int NeighborMines(int i, int j);
 void CellFlag(int i, int j);
+void ResetGame();
+void CheckWin();
 
 int main()
 {
@@ -43,6 +53,69 @@ int main()
 
     flagSprite = LoadTexture("Assets/flag.png");
 
+    ResetGame();
+
+    while (!WindowShouldClose()){
+        // Event Handling
+        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+        {
+            Vector2 mousePos = GetMousePosition();
+            int i = mousePos.x / CELLWIDTH;
+            int j = mousePos.y / CELLHEIGHT;
+
+            if(gameState == PLAYING && InBound(i, j)){
+                CellReveal(i, j);
+                CheckWin();
+            }
+        } else if (IsMouseButtonPressed(MOUSE_RIGHT_BUTTON)){
+            Vector2 mousePos = GetMousePosition();
+            int i = mousePos.x / CELLWIDTH;
+            int j = mousePos.y / CELLHEIGHT;
+
+            if(gameState == PLAYING && InBound(i, j)){
+                CellFlag(i, j);
+            }
+        }
+        if (gameState == GAMEOVER || gameState == WIN){
+            if (IsKeyPressed(KEY_ENTER)){
+                ResetGame();
+            }
+        }
+        
+        // Update
+
+        // Draw
+        BeginDrawing();
+        ClearBackground(RAYWHITE);
+        
+        for (int i = 0; i < COLS; i++){
+            for (int j = 0; j < ROWS; j++){
+                CellDraw(grid[i][j]);
+            }
+        }
+
+        if (gameState == GAMEOVER) {
+            DrawRectangle(0, 0, SCREENWIDTH, SCREENHEIGHT, Fade(RED, 0.5f));
+            DrawText("GAME OVER", SCREENWIDTH / 2 - MeasureText("GAME OVER", 20) / 2, SCREENHEIGHT / 2 - 30, 20, Fade(WHITE, 0.8f));
+            DrawText("PRESS 'ENTER' TO RESTART", SCREENWIDTH / 2 - MeasureText("PRESS 'ENTER' TO RESTART", 20) / 2, SCREENHEIGHT / 2 + 10, 20, Fade(WHITE, 0.8f));
+            DrawText(TextFormat("Time: %.2f seconds", elapsedTime), 10, 10, 20, WHITE);
+        }
+
+        if (gameState == WIN) {
+            DrawRectangle(0, 0, SCREENWIDTH, SCREENHEIGHT, Fade(GREEN, 0.5f));
+            DrawText("YOU WIN", SCREENWIDTH / 2 - MeasureText("YOU WIN", 20) / 2, SCREENHEIGHT / 2 - 30, 20, Fade(WHITE, 0.8f));
+            DrawText("PRESS 'ENTER' TO RESTART", SCREENWIDTH / 2 - MeasureText("PRESS 'ENTER' TO RESTART", 20) / 2, SCREENHEIGHT / 2 + 10, 20, Fade(WHITE, 0.8f));
+            DrawText(TextFormat("Time: %.2f seconds", elapsedTime), 10, 10, 20, WHITE);
+        }
+
+        EndDrawing();
+    }    
+    CloseWindow();
+
+    return 0;
+}
+
+void Grid(){
     // Initialize grid
     for (int i = 0; i < ROWS; i++){
         for (int j = 0; j < COLS; j++){
@@ -58,7 +131,8 @@ int main()
             } */
         }
     }
-    int mines = (ROWS * COLS) / 10; // 10% of the grid
+    minesLeft = (ROWS * COLS) / 10; // 10% of the grid
+    int mines = minesLeft;
 
     std::vector<std::pair<int, int>> minePositions;
     for (int i = 0; i < ROWS; i++){
@@ -84,45 +158,12 @@ int main()
             } 
         }
     }
+}
 
-    while (!WindowShouldClose()){
-        // Event Handling
-        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
-        {
-            Vector2 mousePos = GetMousePosition();
-            int i = mousePos.x / CELLWIDTH;
-            int j = mousePos.y / CELLHEIGHT;
-
-            if(InBound(i, j)){
-                CellReveal(i, j);
-            }
-        } else if (IsMouseButtonPressed(MOUSE_RIGHT_BUTTON)){
-            Vector2 mousePos = GetMousePosition();
-            int i = mousePos.x / CELLWIDTH;
-            int j = mousePos.y / CELLHEIGHT;
-
-            if(InBound(i, j)){
-                CellFlag(i, j);
-            }
-        }
-
-        // Update
-
-        // Draw
-        BeginDrawing();
-        ClearBackground(RAYWHITE);
-        
-        for (int i = 0; i < COLS; i++){
-            for (int j = 0; j < ROWS; j++){
-                CellDraw(grid[i][j]);
-            }
-        }
-
-        EndDrawing();
-    }    
-    CloseWindow();
-
-    return 0;
+void ResetGame(){
+    Grid();
+    gameState = PLAYING;
+    startTime = GetTime();
 }
 
 void CellDraw(Cell cell){
@@ -159,14 +200,13 @@ void CellReveal(int i, int j){
     }
 
     grid[i][j].isRevealed = true;
-    // std::cout << "Cell (" << i << ", " << j << ") revealed." << std::endl;
     if (grid[i][j].containsMine){
         // Game Over Logic
+        gameState = GAMEOVER;
+        elapsedTime = GetTime() - startTime;
     } else{
-        // Play Sound and Continue Logic
-
+        // Flood Fill Logic
         if (grid[i][j].neighborMines == 0){
-            // Flood Fill Logic
             for (int x = -1; x <= 1; x++){
                 for (int y = -1; y <= 1; y++){
                     if (x == 0 && y == 0){
@@ -207,5 +247,26 @@ void CellFlag(int i, int j){
 
     if (InBound(i, j)){
         grid[i][j].isFlagged = !grid[i][j].isFlagged;
+    }
+}
+
+void CheckWin(){
+    int revealedCells = 0;
+    int correctlyFlaggedMines = 0; // If the Flagged cell contains a mine
+
+    for (int i = 0; i < ROWS; i++) {
+        for (int j = 0; j < COLS; j++) {
+            if (grid[i][j].isRevealed && !grid[i][j].containsMine) {
+                revealedCells++;
+            }
+            if (grid[i][j].isFlagged && grid[i][j].containsMine) {
+                correctlyFlaggedMines++;
+            }
+        }
+    }
+
+    if (revealedCells == (ROWS * COLS) - minesLeft && correctlyFlaggedMines == minesLeft) {
+        gameState = WIN;
+        elapsedTime = GetTime() - startTime;
     }
 }
