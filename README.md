@@ -20,12 +20,9 @@ A simple clone of the classic **Minesweeper** game built using **C++** and **[Ra
 - **Build Tool**: Makefile or custom compiler command
 
 ## 📸 Screenshots
-
 | Gameplay | Game Over | Victory |
-|---------|-----------|---------|
-| ![Gameplay](<img width="512" alt="Screenshot 2025-04-04 at 4 50 07 in the afternoon" src="https://github.com/user-attachments/assets/2d52d343-93ad-4f8d-bafb-188e3d094b32" />) | ![Game Over](<img width="512" alt="Screenshot 2025-04-04 at 4 49 33 in the afternoon" src="https://github.com/user-attachments/assets/a2ee93ea-8a8c-4c08-ba78-3813897d90fa" />)
-ng)) | ![Win](<img width="512" alt="Screenshot 2025-04-04 at 5 29 19 in the afternoon" src="https://github.com/user-attachments/assets/f396dec5-df28-4c5f-95f5-a067121f9448" />)
-) |
+|----------|-----------|---------|
+| ![Gameplay](https://github.com/user-attachments/assets/2d52d343-93ad-4f8d-bafb-188e3d094b32) | ![Game Over](https://github.com/user-attachments/assets/a2ee93ea-8a8c-4c08-ba78-3813897d90fa) | ![Win](https://github.com/user-attachments/assets/f396dec5-df28-4c5f-95f5-a067121f9448) |
 
 ## 🚀 Getting Started
 
