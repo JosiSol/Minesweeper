@@ -17,7 +17,7 @@ A simple clone of the classic **Minesweeper** game built using **C++** and **[Ra
 
 - **Language**: C++
 - **Graphics Library**: [Raylib](https://www.raylib.com/)
-- **Build Tool**: Makefile or custom compiler command
+- **Build Tool**: Makefile
 
 ## 📸 Screenshots
 | Gameplay | Game Over | Victory |
@@ -31,3 +31,17 @@ A simple clone of the classic **Minesweeper** game built using **C++** and **[Ra
 ```bash
 git clone https://github.com/yourusername/minesweeper-raylib.git
 cd minesweeper-raylib
+```
+
+### 2. Compile the Game
+```bash
+g++ src/main.cpp -o minesweeper -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
+```
+> 🧠 **Note**: The flags above work on **Linux**.  
+> If you're on **macOS** or **Windows**, you'll need the appropriate Raylib setup.  
+> Check out the [Raylib official installation guide](https://github.com/raysan5/raylib/wiki) for instructions tailored to your OS.
+
+### 3. Run the Game
+```bash
+./main
+```
