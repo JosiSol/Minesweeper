@@ -5,7 +5,6 @@
 #include <utility>
 #include <random>
 
-// ROWS AND COLS OF THE GRID
 #define ROWS 10
 #define COLS 10
 
